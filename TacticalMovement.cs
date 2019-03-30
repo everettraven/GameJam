@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static System.Random;
 
 public class TacticalMovement : MonoBehaviour
 {
@@ -16,10 +17,20 @@ public class TacticalMovement : MonoBehaviour
     //Get the tile the player is currently on
     Tile currentTile;
 
-    public bool moving = false;
+    //logic bools
+    public bool isMoving = false;
+    public bool turn = false;
+    public bool actionTaken = false;
+    public bool isFarting = false;
     // Movement values
     public int move = 3;
     public float moveSpeed = 2f;
+
+    //Player Turn value
+    public int playerTurns = 0;
+
+
+    public int turnsFarted = 0;
 
     //Movement Vectors
     Vector3 velocity = new Vector3();
@@ -30,6 +41,8 @@ public class TacticalMovement : MonoBehaviour
     {
         //Gets all the tiles gameobjects
         tiles = GameObject.FindGameObjectsWithTag("Tile");
+
+        TurnManager.AddUnit(this);
 
     }
 
@@ -49,17 +62,25 @@ public class TacticalMovement : MonoBehaviour
         RaycastHit hit;
         Tile tile = null;
 
+        Debug.DrawRay(target.transform.position, -Vector3.up, Color.blue);
+
         //Use a raycast to make sure you are hitting a tile object
         if(Physics.Raycast(target.transform.position, -Vector3.up, out hit, 1))
         {
+         
             //get the tile that the ray hit
             tile = hit.collider.GetComponent<Tile>();
 
         }
 
-
         return tile;
     }
+
+    public Tile getRandTile() {
+        //Tile t = selectableTiles[r.Next(selectableTiles.Count)];
+        Tile t = selectableTiles[Random.Range(0, selectableTiles.Count)];
+        return t;
+    }//##########################################################################
 
     //Function to find the available tiles
     public void ComputeAvailableTiles()
@@ -73,7 +94,6 @@ public class TacticalMovement : MonoBehaviour
             t.FindAvailableTiles();
         }
     }
-
 
     //Find the tiles that are selectable
     public void FindSelectableTiles()
@@ -130,10 +150,11 @@ public class TacticalMovement : MonoBehaviour
     //Function to move the player to the tile
     public void MoveToTile(Tile tile)
     {
-        //Clear the path and set the chosen target tile to true, and moving to true
+        //Clear the path and set the chosen target tile to true, and actionTaken to true
         path.Clear();
         tile.target = true;
-        moving = true;
+        actionTaken = true;
+        isMoving = true;
 
         //Set the next tile when it reaches the target tile
         Tile next = tile;
@@ -180,11 +201,23 @@ public class TacticalMovement : MonoBehaviour
         {
             //Remove all tiles from selectable tiles so it can be updated later
             RemoveSelectableTiles();
-            //make moving false
-            moving = false;
+            //set is moving to false
+            isMoving = false;
+            //make actionTaken false
+            actionTaken = false;
+            //end the turn
+            TurnManager.EndTurn();
 
         }
 
+    }
+
+    public void Fart()
+    {
+        turnsFarted = playerTurns;
+        isFarting = false;
+        actionTaken = false;
+        TurnManager.EndTurn();
     }
 
     //Function to remove selectable tiles
@@ -217,6 +250,22 @@ public class TacticalMovement : MonoBehaviour
     void SetHorizontalVelocity()
     {
         velocity = heading * moveSpeed;
+    }
+
+    //Begin turn
+    public void BeginTurn()
+    {
+        if(gameObject.tag == "Player")
+        {
+            playerTurns++;
+        }
+        turn = true;
+    }
+
+    //End turn
+    public void EndTurn()
+    {
+        turn = false;
     }
 
 

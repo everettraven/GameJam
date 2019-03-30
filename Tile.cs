@@ -29,17 +29,18 @@ public class Tile : MonoBehaviour
     void Update()
     {
 
+
         if(current)
         {
-            GetComponent<Renderer>().material.color = Color.blue;
+            GetComponent<Renderer>().material.color = Color.white;
         }
         else if(target)
         {
-            GetComponent<Renderer>().material.color = Color.green;
+            GetComponent<Renderer>().material.color = Color.yellow;
         }
         else if(selectable)
         {
-            GetComponent<Renderer>().material.color = Color.red;
+            GetComponent<Renderer>().material.color = Color.green;
         }
         else
         {
@@ -95,11 +96,12 @@ public class Tile : MonoBehaviour
             {
                 //Check if there is anything already on the tile
                 RaycastHit hit;
-                if(!Physics.Raycast(tile.transform.position, Vector3.up, out hit, 1))
+                
+                if (!Physics.Raycast(tile.transform.position, Vector3.up, out hit, 1))
                 {
-                    //add the tile to the list
+                    //add the tile to the list if there isnt
                     tiles.Add(tile);
-                }
+                } 
 
             }
         }
